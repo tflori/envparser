@@ -14,19 +14,12 @@ STRING1=foo
 # a string with spaces surrounded by quotes
 STRING2="foo's bar"
 STRING3='"$quote" - $author'      # string '"$quote" - $author'
+STRING4=foo"' "bar                # string 'foo\' bar'
 
 # variable replacement (assuming user=thomas)
 VAR1=$user                        # string 'thomas'
 VAR2="$user's profile"            # string 'thomas\'s profile'
 VAR3="${APP_ENV-production}"      # string 'production'
-
-# json parsing
-NULL=null                         # null
-INT=42                            # int 42
-FLOAT=23.2                        # float 23.2
-BOOL_TRUE=true                    # bool true
-BOOL_FALSE=false                  # bool false
-OBJECT='{"foo":"bar"}'            # object
 
 # array handling
 ARRAY1=(foo bar)                  # array ['foo', 'bar']
@@ -42,3 +35,61 @@ something is missing please open a feature request on github or create a merge r
 ### Using Environment
 
 All variables available in `$_ENV` and `getenv()` (or a passed array) are available inside the parsed file.
+
+### Conversion of variables
+
+In bash every variable is a string like in *nix every variable is a file and inside is a string. While it is very useful
+on this level we don't want that inside an application.
+
+```bash
+### null (case insensitive)
+NULL1=                            # null (bash typical)
+NULL2=null                        # null
+NULL3="null"                      # null
+STRING1='null'                    # string 'null'
+
+### numbers (checked with is_numeric)
+INT=42                            # int 42
+INT2="23"                         # int 23
+STRING2='42'                      # string '42'
+FLOAT=23.2                        # float 23.2
+FLOAT2="42.1"                     # float 42.1
+STRING3='23.2'                    # string '23.2'
+
+### true (case insensitive)
+BOOL_TRUE=true                    # bool true
+STRING4='true'                    # string 'true'
+
+### ATTENTION! In php: ('false' != false)
+BOOL_FALSE=false                  # bool false
+STRING5='false'                   # string 'false'
+
+### json (you should avoid json in environment files. it is just sugar; ext-json required)
+OBJECT='json:{"foo":"bar"}'       # \stdobj ['foo' => 'bar']
+ARRAY='jsonArray:{"foo":"bar"}'   # array ['foo' => 'bar']
+
+### base64 (use it for unprintable characters)
+APP_KEY="base64:dzN0ICJzZWNyZXQiCg=="
+```
+
+### Concatenation
+
+Strings are concatenated in bash by just connecting the strings together.
+
+```bash
+STRING1="hello"' $user'           # string 'hello $user'
+
+### everything is a string when it gets concatenated
+STRING2=True" Warrior"            # string 'True Warrior'
+```
+
+### Escaping
+
+Escaping quotes works exactly the same as in bash:
+
+```bash
+STRING1="foo's \"bar\""
+STRING2='foo'"'"'s "bar"'
+STRING3='foo'\''s "bar"'
+STRING4=$'foo\'s "bar"'
+```
