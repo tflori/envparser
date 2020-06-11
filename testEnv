@@ -1,0 +1,64 @@
+#!/usr/bin/env php
+<?php
+
+//use EnvParser\EnvParser;
+//
+//require 'vendor/autoload.php';
+//
+//$envParser = new EnvParser();
+//echo json_encode($envParser->read(__DIR__ . '/.env.example'), JSON_PRETTY_PRINT) . PHP_EOL;
+
+use EnvParser\EnvFile;
+use EnvParser\ParseError;
+
+require 'vendor/autoload.php';
+
+try {
+    $file = getFile();
+    if (!is_readable($file)) {
+      throw new InvalidArgumentException('Unable to read file ' . $file);
+    }
+
+    $envFile = new EnvFile();
+    $envFile->read($file);
+
+    if (hasFlag('-o') || hasFlag('--out')) {
+        echo json_encode($envFile->getArrayCopy(), JSON_PRETTY_PRINT) . PHP_EOL;
+    }
+} catch (ParseError $error) {
+    file_put_contents('php://stderr', $error->getMessage() . PHP_EOL);
+    if (!hasFlag('-q') && !hasFlag('--quiet')) {
+        $line = $error->getBufferLine();
+        echo $line . PHP_EOL;
+        preg_match(
+            '/\G(.*?)([' . EnvFile::WHITESPACE_CHARACTERS . ']|$)/',
+            $error->getBuffer(),
+            $match,
+            0,
+            $error->getOffset()
+        );
+        echo str_repeat('_', $error->getColumn()) . '^' . str_repeat('_', strlen($match[1]) - 1) . PHP_EOL;
+    }
+}
+
+function hasFlag(string $argument)
+{
+    foreach ($_SERVER['argv'] as $arg) {
+      if ($arg === $argument) {
+        return true;
+      }
+    }
+
+    return false;
+}
+
+function getFile()
+{
+    foreach ($_SERVER['argv'] as $i => $arg) {
+      if ($i > 0 && $arg[0] !== '-' && file_exists($arg)) {
+          return $arg;
+      }
+    }
+
+    return __DIR__ . '/.env.example';
+}

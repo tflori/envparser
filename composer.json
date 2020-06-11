@@ -1,12 +1,17 @@
 {
     "name": "tflori/envparser",
     "license": "MIT",
+    "bin": [
+        "testEnv"
+    ],
     "require": {
-        "php": "7.1",
+        "php":      "^7.1",
+        "ext-json": "*"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.1",
-        "mockery/mockery": "^1.4"
+        "mockery/mockery": "^1.4",
+        "squizlabs/php_codesniffer": "^3.5"
     },
     "autoload": {
         "psr-4": {

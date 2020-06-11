@@ -1,5 +1,12 @@
 # tflori/envparser
 
+[![Build Status](https://travis-ci.org/tflori/envparser.svg?branch=master)](https://travis-ci.org/tflori/envparser)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/9434ba649634cb577b87/test_coverage)](https://codeclimate.com/github/tflori/envparser/test_coverage)
+[![Maintainability](https://api.codeclimate.com/v1/badges/9434ba649634cb577b87/maintainability)](https://codeclimate.com/github/tflori/envparser/maintainability)
+[![Latest Stable Version](https://poser.pugx.org/tflori/envparser/v/stable.svg)](https://packagist.org/packages/tflori/envparser) 
+[![Total Downloads](https://poser.pugx.org/tflori/envparser/downloads.svg)](https://packagist.org/packages/tflori/envparser) 
+[![License](https://poser.pugx.org/tflori/envparser/license.svg)](https://packagist.org/packages/tflori/envparser)
+
 A small library that is just reading an environment file in bash syntax and returns an array equal to that what you
 would get sourcing this file in a bash environment.
 
