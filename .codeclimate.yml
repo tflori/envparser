@@ -13,4 +13,4 @@ plugins:
     phpcodesniffer:
         enabled: true
         config:
-            standard: "PSR12"
+            standard: "PSR2"
