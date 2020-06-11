@@ -2,10 +2,25 @@
 
 namespace EnvParser\Parser;
 
+use EnvParser\EnvFile;
 use EnvParser\ParseError;
+use function PHPUnit\Framework\assertSame;
 
 abstract class AbstractParser
 {
+    /** @var EnvFile */
+    protected $file;
+
+    /**
+     * AbstractParser constructor.
+     *
+     * @param EnvFile $file
+     */
+    public function __construct(EnvFile $file)
+    {
+        $this->file = $file;
+    }
+
     /**
      * @param string $buffer
      * @param int    $offset
@@ -14,25 +29,12 @@ abstract class AbstractParser
      */
     abstract public function read(string $buffer, int &$offset);
 
-    protected function string2Var(string $value)
-    {
-        $lower = strtolower($value);
-        if (strlen($value) === 0 || $lower === 'null') {
-            return null;
-        }
-
-        if ($lower === 'true' || $lower === 'false') {
-            return $lower === 'true';
-        }
-
-        if (is_numeric($value)) {
-            $int = (int)$value;
-            $float = (double)$value;
-            return $int == $float ? $int : $float;
-        }
-
-        return json_decode($value) ?? $value;
-    }
+    /**
+     * @param string $buffer
+     * @param int    $offset
+     * @return mixed
+     */
+    abstract public function match(string $buffer, int $offset);
 
     protected function interpolate(string $value)
     {
@@ -44,5 +46,15 @@ abstract class AbstractParser
             },
             $value
         );
+    }
+
+    protected function currentLine($buffer, $offset)
+    {
+        $nextLineFeed = strpos($buffer, "\n", $offset);
+        if ($nextLineFeed === false) {
+            return substr($buffer, $offset);
+        }
+
+        return substr($buffer, $offset, $nextLineFeed - $offset);
     }
 }
