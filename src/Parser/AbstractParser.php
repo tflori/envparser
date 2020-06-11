@@ -4,7 +4,6 @@ namespace EnvParser\Parser;
 
 use EnvParser\EnvFile;
 use EnvParser\ParseError;
-use function PHPUnit\Framework\assertSame;
 
 abstract class AbstractParser
 {

@@ -23,7 +23,7 @@ before_script:
     fi
 
 script:
-  - composer code-style
+  - vendor/bin/phpcs --standard=PSR12 src tests
   - vendor/bin/phpunit -c phpunit.xml --coverage-clover=clover.xml --coverage-text --color=always
 
 after_script:

@@ -9,7 +9,7 @@ use EnvParser\Parser\VarAssignmentParser;
 
 class EnvFile extends \ArrayObject
 {
-    const WHITESPACE_CHARACTERS = ' \t\n';
+    public const WHITESPACE_CHARACTERS = ' \t\n';
 
     /** @var string */
     protected $path;
