@@ -15,7 +15,7 @@ class ParseError extends \Exception
     /** @var int */
     protected $column;
 
-    public function __construct($message, $path, $buffer, $offset)
+    public function __construct(ParserError $error, $path, $buffer, $offset)
     {
         $this->buffer = $buffer;
         $this->offset = $offset;
@@ -29,9 +29,9 @@ class ParseError extends \Exception
             $path,
             $line,
             $column,
-            $message
+            $error->getMessage()
         );
-        parent::__construct($message);
+        parent::__construct($message, 0, $error);
     }
 
     public function getBufferLine(): string

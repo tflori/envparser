@@ -2,7 +2,7 @@
 
 namespace EnvParser\Parser;
 
-use EnvParser\ParseError;
+use EnvParser\ParserError;
 
 class VarAccessParser extends AbstractParser
 {
@@ -40,7 +40,7 @@ class VarAccessParser extends AbstractParser
                 }
 
                 // no parser matched - we got something else
-                throw $this->file->createParseError('Unexpected ' . $buffer[$offset], $buffer, $offset);
+                throw new ParserError('Unexpected ' . $buffer[$offset]);
             }
 
             $this->value = $value;
