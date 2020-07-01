@@ -18,8 +18,8 @@ class VarAccessParser extends AbstractParser
 
         if ($match[0][1] === '{') {
             $parsers = [
-                // ArrayAccessParser::class,
-                // DefaultValueParser::class,
+                 $this->file->getParser(ArrayAccessParser::class),
+                 $this->file->getParser(DefaultValueParser::class),
             ];
 
             $length = strlen($buffer);
@@ -33,8 +33,13 @@ class VarAccessParser extends AbstractParser
                     if ($parser->match($buffer, $offset)) {
                         $parser->read($buffer, $offset);
 
-                        // if ($parser instanceof ArrayAccessParser) then change value to item of array or null
-                        // if ($parser instanceof DefaultValueParser) then change value if value is empty
+                        if ($parser instanceof ArrayAccessParser) {
+                            $value = $value[$parser->getKey()] ?? null;
+                        }
+
+                        if ($parser instanceof DefaultValueParser) {
+                            $value = empty($value) ? $parser->getDefault() : $value;
+                        }
                         continue 2;
                     }
                 }

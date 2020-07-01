@@ -1,13 +1,6 @@
 #!/usr/bin/env php
 <?php
 
-//use EnvParser\EnvParser;
-//
-//require 'vendor/autoload.php';
-//
-//$envParser = new EnvParser();
-//echo json_encode($envParser->read(__DIR__ . '/.env.example'), JSON_PRETTY_PRINT) . PHP_EOL;
-
 use EnvParser\EnvFile;
 use EnvParser\ParseError;
 
@@ -23,12 +16,19 @@ try {
     $envFile->read($file);
 
     if (hasFlag('-o') || hasFlag('--out')) {
+        foreach ($envFile as $var => $value) {
+          echo $var . ':';
+          var_dump($value);
+        }
+    }
+
+    if (hasFlag('-j') || hasFlag('--json')) {
         echo json_encode($envFile->getArrayCopy(), JSON_PRETTY_PRINT) . PHP_EOL;
     }
 } catch (ParseError $error) {
     file_put_contents('php://stderr', $error->getMessage() . PHP_EOL);
-    if (!hasFlag('-q') && !hasFlag('--quiet')) {
-        $line = $error->getBufferLine();
+    $line = $error->getBufferLine();
+    if (strlen($line) > 0 && !hasFlag('-q') && !hasFlag('--quiet')) {
         echo $line . PHP_EOL;
         preg_match(
             '/\G(.*?)([' . EnvFile::WHITESPACE_CHARACTERS . ']|$)/',
