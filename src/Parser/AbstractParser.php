@@ -33,7 +33,7 @@ abstract class AbstractParser
      * @param int    $offset
      * @return mixed
      */
-    abstract public function match(string $buffer, int $offset);
+    abstract public function match(string $buffer, int $offset): bool;
 
     protected function currentLine($buffer, $offset)
     {

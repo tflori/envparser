@@ -14,8 +14,7 @@ class VarAccessParser extends AbstractParser
         preg_match('/\G\$\{?([a-zA-Z][a-zA-Z0-9_]*)/', $buffer, $match, 0, $offset);
         $var = $match[1];
         $value = $this->value = $this->file->get($var);
-        $length = strlen($match[0]);
-        $offset += $length;
+        $offset += strlen($match[0]);
 
         if ($match[0][1] === '{') {
             $parsers = [
@@ -23,6 +22,7 @@ class VarAccessParser extends AbstractParser
                 // DefaultValueParser::class,
             ];
 
+            $length = strlen($buffer);
             while ($offset < $length) {
                 if ($buffer[$offset] === '}') {
                     $offset++;
@@ -47,7 +47,7 @@ class VarAccessParser extends AbstractParser
         }
     }
 
-    public function match(string $buffer, int $offset)
+    public function match(string $buffer, int $offset): bool
     {
         return !!preg_match('/\G\$\{?[a-zA-Z][a-zA-Z0-9_]*/', $buffer, $match, 0, $offset);
     }

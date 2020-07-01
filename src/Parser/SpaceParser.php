@@ -13,7 +13,7 @@ class SpaceParser extends AbstractParser
         $offset += strlen($match[0]);
     }
 
-    public function match(string $buffer, int $offset)
+    public function match(string $buffer, int $offset): bool
     {
         return !!preg_match('/\G[' . EnvFile::WHITESPACE_CHARACTERS . ']/', $buffer, $match, 0, $offset);
     }

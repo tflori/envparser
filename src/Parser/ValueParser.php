@@ -20,37 +20,68 @@ class ValueParser extends AbstractParser
             $this->file->getParser(SpaceParser::class),
             $this->file->getParser(CommentParser::class),
             $this->file->getParser(VarAccessParser::class),
+            $this->file->getParser(DoubleQuoteParser::class),
+            $this->file->getParser(SingleQuoteParser::class),
         ];
 
+        $state = 'read';
         $value = '';
         $bare = true;
         while ($offset < $length) {
-            foreach ($parsers as $parser) {
-                if ($parser->match($buffer, $offset)) {
-                    $parser->read($buffer, $offset);
+            switch ($state) {
+                case 'escaped':
+                    $value .= $buffer[$offset];
+                    $offset++;
+                    $state = 'read';
+                    break;
 
-                    // spaces and coments end the value part
-                    if ($parser instanceof SpaceParser || $parser instanceof CommentParser) {
-                        break 2; // stop reading
-                    }
+                case 'read':
+                    foreach ($parsers as $parser) {
+                        if ($parser->match($buffer, $offset)) {
+                            $parser->read($buffer, $offset);
 
-                    if ($parser instanceof VarAccessParser) {
-                        $bare = false;
+                            // spaces and coments end the value part
+                            if ($parser instanceof SpaceParser || $parser instanceof CommentParser) {
+                                break 3; // stop reading
+                            }
 
-                        if (strlen($value) > 0) {
-                            $value .= $parser->getValue();
-                            continue 2;
+                            if ($parser instanceof VarAccessParser) {
+                                $bare = false;
+
+                                if (strlen($value) > 0) {
+                                    $value .= $parser->getValue();
+                                    continue 3;
+                                }
+
+                                $value = $parser->getValue();
+                                continue 3;
+                            }
+
+                            if ($parser instanceof DoubleQuoteParser) {
+                                if (strlen($value) > 0) {
+                                    $bare = false;
+                                }
+
+                                $value .= $parser->getString();
+                                continue 3;
+                            }
+
+                            if ($parser instanceof SingleQuoteParser) {
+                                $bare = false;
+                                $value .= $parser->getString();
+                                continue 3;
+                            }
                         }
-
-                        $value = $parser->getValue();
-                        continue 2;
                     }
-                }
-            }
 
-            // other characters are all handled as value
-            $value .= $buffer[$offset];
-            $offset++;
+                    if ($buffer[$offset] === '\\') {
+                        $state = 'escaped';
+                    } else {
+                        $value .= $buffer[$offset];
+                    }
+                    $offset++;
+                    break;
+            }
         }
 
         // prepare the value ?
@@ -79,7 +110,7 @@ class ValueParser extends AbstractParser
         return $value;
     }
 
-    public function match(string $buffer, int $offset)
+    public function match(string $buffer, int $offset): bool
     {
         return !!preg_match('/\G[^' . $this->file::WHITESPACE_CHARACTERS . ']/', $buffer, $match, 0, $offset);
     }

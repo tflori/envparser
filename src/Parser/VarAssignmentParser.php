@@ -27,7 +27,7 @@ class VarAssignmentParser extends AbstractParser
         $this->value = $valueParser->getValue();
     }
 
-    public function match(string $buffer, int $offset)
+    public function match(string $buffer, int $offset): bool
     {
         return !!preg_match('/\G([A-Za-z_][a-zA-Z0-9_]*)(?:\[(\d+)\])?=/', $buffer, $match, 0, $offset);
     }

@@ -14,7 +14,7 @@ class CommentParser extends AbstractParser
         $offset = $nextLf !== false ? $nextLf + 1 : strlen($buffer);
     }
 
-    public function match(string $buffer, int $offset)
+    public function match(string $buffer, int $offset): bool
     {
         return $buffer[$offset] === '#';
     }
