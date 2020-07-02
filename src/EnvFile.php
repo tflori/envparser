@@ -17,11 +17,17 @@ class EnvFile extends \ArrayObject
     /** @var callable */
     protected $resolver;
 
+    /** @var AbstractParser[] */
+    protected $resolved = [];
+
     public function __construct(array $context = null, callable $resolver = null)
     {
         $this->context = $context ?? getenv();
-        $this->resolver = $resolver ?? function (string $class) {
-            return new $class($this);
+        $this->resolver = $resolver ?? function (string $class, ...$args) {
+            if (!isset($this->resolved[$class])) {
+                $this->resolved[$class] = new $class($this, ...$args);
+            }
+            return $this->resolved[$class];
         };
         parent::__construct([], self::ARRAY_AS_PROPS);
     }
