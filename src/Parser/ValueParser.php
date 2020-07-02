@@ -66,49 +66,57 @@ class ValueParser extends AbstractParser
     {
         /** @var AbstractParser[] $parsers */
         $parsers = [
-            $this->file->getParser(SpaceParser::class),
-            $this->file->getParser(CommentParser::class),
-            $this->file->getParser(VarAccessParser::class),
-            $this->file->getParser(DoubleQuoteParser::class),
-            $this->file->getParser(SingleQuoteParser::class),
+            'parseSpace' => $this->file->getParser(SpaceParser::class),
+            'parseComment' => $this->file->getParser(CommentParser::class),
+            'parseVarAccess' => $this->file->getParser(VarAccessParser::class),
+            'parseDoubleQuote' => $this->file->getParser(DoubleQuoteParser::class),
+            'parseSingleQuote' => $this->file->getParser(SingleQuoteParser::class),
         ];
 
-        foreach ($parsers as $parser) {
+        foreach ($parsers as $method => $parser) {
             if ($parser->match($buffer, $offset)) {
                 $parser->read($buffer, $offset);
-
-                // spaces and comments end the value part
-                if ($parser instanceof SpaceParser || $parser instanceof CommentParser) {
-                    return self::STATE_END;
-                }
-
-                if ($parser instanceof VarAccessParser) {
-                    $bare = false;
-
-                    (strlen($value) > 0) ?
-                        $value .= $parser->getValue() :
-                        $value = $parser->getValue();
-                    return self::STATE_READ;
-                }
-
-                if ($parser instanceof DoubleQuoteParser) {
-                    if (strlen($value) > 0) {
-                        $bare = false;
-                    }
-
-                    $value .= $parser->getString();
-                    return self::STATE_READ;
-                }
-
-                if ($parser instanceof SingleQuoteParser) {
-                    $bare = false;
-                    $value .= $parser->getString();
-                    return self::STATE_READ;
-                }
+                return $this->$method($parser, $value, $bare);
             }
         }
 
         return '';
+    }
+
+    protected function parseSpace(SpaceParser $parser)
+    {
+        return self::STATE_END;
+    }
+
+    protected function parseComment(CommentParser $parser)
+    {
+        return self::STATE_END;
+    }
+
+    protected function parseVarAccess(VarAccessParser $parser, &$value, &$bare)
+    {
+        $bare = false;
+        (strlen($value) > 0) ?
+            $value .= $parser->getValue() :
+            $value = $parser->getValue();
+        return self::STATE_READ;
+    }
+
+    protected function parseDoubleQuote(DoubleQuoteParser $parser, &$value, &$bare)
+    {
+        if (strlen($value) > 0) {
+            $bare = false;
+        }
+
+        $value .= $parser->getString();
+        return self::STATE_READ;
+    }
+
+    protected function parseSingleQuote(SingleQuoteParser $parser, &$value, &$bare)
+    {
+        $bare = false;
+        $value .= $parser->getString();
+        return self::STATE_READ;
     }
 
     /**
