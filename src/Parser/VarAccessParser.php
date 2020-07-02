@@ -16,40 +16,57 @@ class VarAccessParser extends AbstractParser
         $value = $this->value = $this->file->get($var);
         $offset += strlen($match[0]);
 
+        // find the closing brace if we have an opening brace
         if ($match[0][1] === '{') {
-            $parsers = [
-                 $this->file->getParser(ArrayAccessParser::class),
-                 $this->file->getParser(DefaultValueParser::class),
-            ];
-
             $length = strlen($buffer);
             while ($offset < $length) {
                 if ($buffer[$offset] === '}') {
                     $offset++;
                     break;
+                } elseif (!$this->parse($buffer, $offset, $value)) {
+                    // no parser matched - we got something else
+                    throw new ParserError('Unexpected ' . $buffer[$offset]);
                 }
-
-                foreach ($parsers as $parser) {
-                    if ($parser->match($buffer, $offset)) {
-                        $parser->read($buffer, $offset);
-
-                        if ($parser instanceof ArrayAccessParser) {
-                            $value = $value[$parser->getKey()] ?? null;
-                        }
-
-                        if ($parser instanceof DefaultValueParser) {
-                            $value = empty($value) ? $parser->getDefault() : $value;
-                        }
-                        continue 2;
-                    }
-                }
-
-                // no parser matched - we got something else
-                throw new ParserError('Unexpected ' . $buffer[$offset]);
             }
 
             $this->value = $value;
         }
+    }
+
+    /**
+     * Check for a array access or default value at this position
+     *
+     * If you find something:
+     *   - forward the offset and update the value
+     *
+     * @param string $buffer
+     * @param int    $offset
+     * @param mixed  $value
+     * @return bool|null
+     */
+    protected function parse(string $buffer, int &$offset, &$value): ?bool
+    {
+        $parsers = [
+            $this->file->getParser(ArrayAccessParser::class),
+            $this->file->getParser(DefaultValueParser::class),
+        ];
+
+        foreach ($parsers as $parser) {
+            if ($parser->match($buffer, $offset)) {
+                $parser->read($buffer, $offset);
+
+                if ($parser instanceof ArrayAccessParser) {
+                    $value = ((array)$value)[$parser->getKey()] ?? null;
+                }
+
+                if ($parser instanceof DefaultValueParser) {
+                    $value = empty($value) ? $parser->getDefault() : $value;
+                }
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function match(string $buffer, int $offset): bool
