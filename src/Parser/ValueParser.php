@@ -71,6 +71,7 @@ class ValueParser extends AbstractParser
             'parseVarAccess' => $this->file->getParser(VarAccessParser::class),
             'parseDoubleQuote' => $this->file->getParser(DoubleQuoteParser::class),
             'parseSingleQuote' => $this->file->getParser(SingleQuoteParser::class),
+            'parseCString' => $this->file->getParser(CStringParser::class),
         ];
 
         foreach ($parsers as $method => $parser) {
@@ -113,6 +114,13 @@ class ValueParser extends AbstractParser
     }
 
     protected function parseSingleQuote(SingleQuoteParser $parser, &$value, &$bare)
+    {
+        $bare = false;
+        $value .= $parser->getString();
+        return self::STATE_READ;
+    }
+
+    protected function parseCString(CStringParser $parser, &$value, &$bare)
     {
         $bare = false;
         $value .= $parser->getString();
