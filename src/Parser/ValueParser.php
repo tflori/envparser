@@ -3,6 +3,7 @@
 namespace EnvParser\Parser;
 
 use EnvParser\ParseError;
+use EnvParser\ParserError;
 use EnvParser\StringValue;
 
 class ValueParser extends AbstractParser
@@ -18,7 +19,7 @@ class ValueParser extends AbstractParser
     /** @var mixed */
     protected $value;
 
-    public function read(string $buffer, int &$offset)
+    public function read(string $buffer, int &$offset, bool $inArray = false)
     {
         $this->value = null;
         $length = strlen($buffer);
@@ -38,11 +39,14 @@ class ValueParser extends AbstractParser
                     break;
 
                 case self::STATE_READ:
-                    $state = $this->parse($buffer, $offset, $value, $bare);
+                    $state = $this->parse($buffer, $offset, $inArray, $value, $bare);
 
                     if ($state === '') {
                         if ($buffer[$offset] === '\\') {
                             $state = self::STATE_ESCAPED;
+                        } elseif ($buffer[$offset] === ')') {
+                            // The ) ends the value and still needs to get read from something
+                            break 2;
                         } else {
                             $state = self::STATE_READ;
                             $value .= $buffer[$offset];
@@ -62,7 +66,7 @@ class ValueParser extends AbstractParser
         $this->value = is_string($value) ? $this->decode($value) : $value;
     }
 
-    protected function parse(string $buffer, int &$offset, &$value, &$bare)
+    protected function parse(string $buffer, int &$offset, bool $inArray, &$value, &$bare)
     {
         /** @var AbstractParser[] $parsers */
         $parsers = [
@@ -72,12 +76,13 @@ class ValueParser extends AbstractParser
             'parseDoubleQuote' => $this->file->getParser(DoubleQuoteParser::class),
             'parseSingleQuote' => $this->file->getParser(SingleQuoteParser::class),
             'parseCString' => $this->file->getParser(CStringParser::class),
+            'parseArray' => $this->file->getParser(ArrayParser::class),
         ];
 
         foreach ($parsers as $method => $parser) {
             if ($parser->match($buffer, $offset)) {
                 $parser->read($buffer, $offset);
-                return $this->$method($parser, $value, $bare);
+                return $this->$method($parser, $value, $bare, $inArray);
             }
         }
 
@@ -125,6 +130,16 @@ class ValueParser extends AbstractParser
         $bare = false;
         $value .= $parser->getString();
         return self::STATE_READ;
+    }
+
+    protected function parseArray(ArrayParser $parser, &$value, &$bare, $inArray)
+    {
+        if ($inArray) {
+            throw new ParserError('Array inside array is not allowed');
+        }
+        $bare = false;
+        $value = $parser->getValues();
+        return self::STATE_END;
     }
 
     /**

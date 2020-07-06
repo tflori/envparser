@@ -21,9 +21,11 @@ class VarAssignmentParser extends AbstractParser
         $this->var = $match[1];
         $this->key = isset($match[2]) ? (int)$match[2] : null;
         $offset += strlen($match[0]);
-        // test array parser and use
+
+        /** @var ValueParser  $valueParser */
         $valueParser = $this->file->getParser(ValueParser::class);
-        $valueParser->read($buffer, $offset);
+        $valueParser->read($buffer, $offset, !is_null($this->key));
+
         $this->value = $valueParser->getValue();
     }
 

@@ -30,14 +30,16 @@ try {
     $line = $error->getBufferLine();
     if (strlen($line) > 0 && !hasFlag('-q') && !hasFlag('--quiet')) {
         echo $line . PHP_EOL;
-        preg_match(
-            '/\G(.*?)([' . EnvFile::WHITESPACE_CHARACTERS . ']|$)/',
-            $error->getBuffer(),
-            $match,
-            0,
-            $error->getOffset()
-        );
-        echo str_repeat('_', $error->getColumn()) . '^' . str_repeat('_', strlen($match[1]) - 1) . PHP_EOL;
+        if (strlen($line) > $error->getColumn()) {
+            preg_match(
+                '/\G(.*?)([' . EnvFile::WHITESPACE_CHARACTERS . ']|$)/',
+                $error->getBuffer(),
+                $match,
+                0,
+                $error->getOffset()
+            );
+            echo str_repeat('_', $error->getColumn()) . '^' . str_repeat('_', strlen($match[1]) - 1) . PHP_EOL;
+        }
     }
 }
 
