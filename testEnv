@@ -25,6 +25,10 @@ try {
     if (hasFlag('-j') || hasFlag('--json')) {
         echo json_encode($envFile->getArrayCopy(), JSON_PRETTY_PRINT) . PHP_EOL;
     }
+
+    if (hasFlag('-p') || hasFlag('--php')) {
+      var_export($envFile->getArrayCopy());
+    }
 } catch (ParseError $error) {
     file_put_contents('php://stderr', $error->getMessage() . PHP_EOL);
     $line = $error->getBufferLine();
