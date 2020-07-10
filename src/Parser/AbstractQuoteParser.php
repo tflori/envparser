@@ -37,6 +37,7 @@ abstract class AbstractQuoteParser extends AbstractParser
         return null;
     }
 
+    /** @codeCoverageIgnore */
     public function getString(): string
     {
         return $this->string;

@@ -36,6 +36,7 @@ class VarAssignmentParser extends AbstractParser
 
     /**
      * @return string
+     * @codeCoverageIgnore
      */
     public function getVar(): string
     {
@@ -44,15 +45,14 @@ class VarAssignmentParser extends AbstractParser
 
     /**
      * @return int|null
+     * @codeCoverageIgnore
      */
     public function getKey(): ?int
     {
         return $this->key;
     }
 
-    /**
-     * @return mixed
-     */
+    /** @codeCoverageIgnore */
     public function getValue()
     {
         return $this->value;

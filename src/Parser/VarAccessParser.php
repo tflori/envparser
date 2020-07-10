@@ -74,6 +74,7 @@ class VarAccessParser extends AbstractParser
         return !!preg_match('/\G\$\{?[a-zA-Z][a-zA-Z0-9_]*/', $buffer, $match, 0, $offset);
     }
 
+    /** @codeCoverageIgnore */
     public function getValue()
     {
         return $this->value;

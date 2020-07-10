@@ -24,6 +24,7 @@ class DefaultValueParser extends AbstractParser
         return $buffer[$offset] === '-';
     }
 
+    /** @codeCoverageIgnore */
     public function getDefault(): ?string
     {
         return $this->default;

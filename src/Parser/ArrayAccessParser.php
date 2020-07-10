@@ -24,6 +24,7 @@ class ArrayAccessParser extends AbstractParser
         return !!preg_match('/\G\[[a-z0-9A-Z_]+\]/', $buffer, $match, 0, $offset);
     }
 
+    /** @codeCoverageIgnore */
     public function getKey(): ?string
     {
         return $this->key;

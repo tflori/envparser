@@ -42,16 +42,19 @@ class ParseError extends \Exception
         return substr($this->buffer, $lineStart, $lineEnd - $lineStart);
     }
 
+    /** @codeCoverageIgnore */
     public function getColumn()
     {
         return $this->column;
     }
 
+    /** @codeCoverageIgnore */
     public function getBuffer()
     {
         return $this->buffer;
     }
 
+    /** @codeCoverageIgnore */
     public function getOffset()
     {
         return $this->offset;

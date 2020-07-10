@@ -170,6 +170,7 @@ class ValueParser extends AbstractParser
         return !!preg_match('/\G[^' . $this->file::WHITESPACE_CHARACTERS . ']/', $buffer, $match, 0, $offset);
     }
 
+    /** @codeCoverageIgnore */
     public function getValue()
     {
         return $this->value;

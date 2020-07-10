@@ -45,7 +45,7 @@ class VarAssignmentParserTest extends TestCase
         $offset = 0;
 
         $this->envFile->shouldReceive('getParser')->with(ValueParser::class)->once()->andReturn($valueParser);
-        $valueParser->shouldReceive('read')->with('a=', 2)->once();
+        $valueParser->shouldReceive('read')->with('a=', 2, false)->once();
         $valueParser->shouldReceive('getValue')->with()->once()->andReturn('foobar');
 
         $parser->read($buffer, $offset);

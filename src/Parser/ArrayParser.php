@@ -41,9 +41,7 @@ class ArrayParser extends AbstractParser
         return $buffer[$offset] === '(';
     }
 
-    /**
-     * @return array
-     */
+    /** @codeCoverageIgnore */
     public function getValues(): array
     {
         return $this->values;

@@ -56,6 +56,7 @@ class CStringParser extends AbstractParser
         return substr($buffer, $offset, 2) === '$\'';
     }
 
+    /** @codeCoverageIgnore */
     public function getString(): string
     {
         return $this->string;
