@@ -22,14 +22,15 @@ class VarAccessParser extends AbstractParser
             while ($offset < $length) {
                 if ($buffer[$offset] === '}') {
                     $offset++;
-                    break;
+                    $this->value = $value;
+                    return;
                 } elseif (!$this->parse($buffer, $offset, $value)) {
                     // no parser matched - we got something else
                     throw new ParserError('Unexpected ' . $buffer[$offset]);
                 }
             }
 
-            $this->value = $value;
+            throw new ParserError('Unexpected end of file. Expected closing brace');
         }
     }
 
