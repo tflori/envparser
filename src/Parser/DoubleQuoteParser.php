@@ -56,6 +56,18 @@ class DoubleQuoteParser extends AbstractQuoteParser
         throw new ParserError('Unexpected end of file. Expected double quote.');
     }
 
+    /**
+     * Check for a var access or other magic inside strings at this position
+     *
+     * If you find something:
+     *   - forward the offset and return the string
+     *   - values of boolean should be 'false' and 'true'
+     *
+     * @param string $buffer
+     * @param int    $offset
+     * @return string|null
+     * @throws ParseError
+     */
     protected function parse(string $buffer, int &$offset): ?string
     {
         /** @var VarAccessParser $parser */
