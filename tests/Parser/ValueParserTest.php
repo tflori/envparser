@@ -3,6 +3,7 @@
 namespace EnvParserTests\Parser;
 
 use EnvParser\Parser\ValueParser;
+use EnvParser\ParserError;
 use EnvParserTests\TestCase;
 
 class ValueParserTest extends TestCase
@@ -156,5 +157,89 @@ class ValueParserTest extends TestCase
             'jsonArray' => ['jsonArray:{"foo":"bar"}', ['foo' => 'bar']],
             'base64' => ['base64:Zm9vQmFyCg==', "fooBar\n"],
         ];
+    }
+
+    /** @test */
+    public function everyCharacterCanBeEscaped()
+    {
+        $parser = new ValueParser($this->envFile);
+        $buffer = 'foo=\h\e\l\l\o\ w\0\"\\\'\\....';
+        $offset = 4;
+
+        $parser->read($buffer, $offset);
+
+        self::assertEquals('hello w0"\'....', $parser->getValue());
+    }
+
+    /** @test */
+    public function stringConcatenationPreventsInterpretation()
+    {
+        $parser = new ValueParser($this->envFile);
+        $buffer = 'foo=nu"ll"';
+        $offset = 4;
+
+        $parser->read($buffer, $offset);
+
+        self::assertSame('null', $parser->getValue());
+    }
+
+    /** @test */
+    public function doubleQuotesAreStillInterpreted()
+    {
+        $parser = new ValueParser($this->envFile);
+        $buffer = 'foo="null"';
+        $offset = 4;
+
+        $parser->read($buffer, $offset);
+
+        self::assertSame(null, $parser->getValue());
+    }
+
+    /** @test */
+    public function singleQuotesAreNeverInterpreted()
+    {
+        $parser = new ValueParser($this->envFile);
+        $buffer = 'foo=\'null\'';
+        $offset = 4;
+
+        $parser->read($buffer, $offset);
+
+        self::assertSame('null', $parser->getValue());
+    }
+
+    /** @test */
+    public function cStringsAreNeverInterpreted()
+    {
+        $parser = new ValueParser($this->envFile);
+        $buffer = 'foo=$\'null\'';
+        $offset = 4;
+
+        $parser->read($buffer, $offset);
+
+        self::assertSame('null', $parser->getValue());
+    }
+
+    /** @test */
+    public function throwsWhenFindingAnArrayInsideAnArray()
+    {
+        $parser = new ValueParser($this->envFile);
+        $buffer = 'foo[]=(bar)';
+        $offset = 6;
+
+        self::expectException(ParserError::class);
+
+        $parser->read($buffer, $offset, true);
+    }
+
+    /** @test */
+    public function stopsReadingAfterAnArray()
+    {
+        $parser = new ValueParser($this->envFile);
+        $buffer = 'foo=(bar)asdf';
+        $offset = 4;
+
+        $parser->read($buffer, $offset);
+
+        self::assertSame(['bar'], $parser->getValue());
     }
 }
