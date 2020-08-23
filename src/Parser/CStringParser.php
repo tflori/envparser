@@ -13,7 +13,7 @@ class CStringParser extends AbstractParser
 
     public function read(string $buffer, int &$offset)
     {
-        if (!substr($buffer, $offset, 2) === '$\'') {
+        if (substr($buffer, $offset, 2) !== '$\'') {
             throw new \InvalidArgumentException('No c-like string starting at offset ' . $offset);
         }
 
