@@ -107,6 +107,7 @@ class CStringParserTest extends TestCase
             ['\xN', '\\xN'], // N has to be between 0 and F otherwise it is not replaced
             ['\u45', 'E'], // unicode charaters < FF are equal with \x
             ['\u0045', 'E'], // but they accept 4 digits
+            ['\u7', "\x7"], // in bash this will return the ascii character bell
             ['\u30C4', 'ツ'],
             ['\uN', '\\uN'], // N has to be between 0 and F otherwise it is not replaced
             ['\U00000045', 'E'], // uppercase U allows up to 8 digits

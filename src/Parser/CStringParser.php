@@ -38,95 +38,7 @@ class CStringParser extends AbstractParser
                     break;
 
                 case 'escaped':
-                    switch ($char) {
-                        case '"':
-                            $content .= '"';
-                            break;
-
-                        case '\'':
-                            $content .= '\'';
-                            break;
-
-                        case '\\':
-                            $content .= '\\';
-                            break;
-
-                        case 'a':
-                            $content .= "\x7";
-                            break;
-
-                        case 'b':
-                            $content .= "\x8";
-                            break;
-
-                        case 'e':
-                        case 'E':
-                            $content .= "\e";
-                            break;
-
-                        case 'f':
-                            $content .= "\xC";
-                            break;
-
-                        case 'n':
-                            $content .= "\n";
-                            break;
-
-                        case 'r':
-                            $content .= "\r";
-                            break;
-
-                        case 't':
-                            $content .= "\t";
-                            break;
-
-                        case 'v':
-                            $content .= "\v";
-                            break;
-
-                        case 'x': // hexadecimal
-                            if (!preg_match('/\G([0-9A-F]{1,2})/', $buffer, $match, 0, $offset)) {
-                                $content .= '\\x';
-                            } else {
-                                $content .= chr(hexdec($match[1]));
-                                $offset += strlen($match[1]);
-                            }
-                            break;
-
-                        case 'u': // unicode
-                            if (!preg_match('/\G([0-9A-F]{1,4})/', $buffer, $match, 0, $offset)) {
-                                $content .= '\\u';
-                            } else {
-                                $content .= html_entity_decode('&#x' . $match[1] . ';');
-                                $offset += strlen($match[1]);
-                            }
-                            break;
-
-                        case 'U': // unicode with up to 8 digits
-                            if (!preg_match('/\G([0-9A-F]{1,8})/', $buffer, $match, 0, $offset)) {
-                                $content .= '\\U';
-                            } else {
-                                $content .= html_entity_decode('&#x' . $match[1] . ';');
-                                $offset += strlen($match[1]);
-                            }
-                            break;
-
-                        case 'c':
-                            $dec = ord(strtoupper($buffer[$offset])) - 64;
-                            if ($dec >= 0 && $dec < 32) {
-                                $content .= chr($dec);
-                            }
-                            $offset++;
-                            break;
-
-                        default:
-                            if (preg_match('/\G([0-7]{1,3})/', $buffer, $match, 0, $offset - 1)) {
-                                $content .= chr(octdec($match[1]));
-                                $offset += strlen($match[1]) - 1;
-                            } else {
-                                $content .= '\\' . $char;
-                            }
-                    }
+                    $this->readEscapedCharacter($char, $buffer, $offset, $content);
                     $state = 'unescaped';
                     break;
             }
@@ -144,5 +56,70 @@ class CStringParser extends AbstractParser
     public function getString(): string
     {
         return $this->string;
+    }
+
+    protected function readEscapedCharacter(string $escaped, string $buffer, int &$offset, string &$content)
+    {
+        static $mapping = [
+            '"' => '"',
+            '\'' => '\'',
+            '\\' => '\\',
+            'a' => "\x7",
+            'b' => "\x8",
+            'e' => "\e",
+            'E' => "\e",
+            'f' => "\xC",
+            'n' => "\n",
+            'r' => "\r",
+            't' => "\t",
+            'v' => "\v",
+        ];
+        if (isset($mapping[$escaped])) {
+            $content .= $mapping[$escaped];
+            return;
+        }
+
+        static $maxLen = [
+            'x' => 2,
+            'u' => 4,
+            'U' => 8,
+        ];
+        if (isset($maxLen[$escaped])) {
+            $char = $this->readHexChar($maxLen[$escaped], $buffer, $offset);
+            $content .= $char === false ? '\\' . $escaped : $char;
+            return;
+        }
+
+        if ($escaped === 'c') {
+            $dec = ord(strtoupper($buffer[$offset])) - 64;
+            if ($dec >= 0 && $dec < 32) {
+                $content .= chr($dec);
+            }
+            $offset++;
+            return;
+        }
+
+        if (preg_match('/\G([0-7]{1,3})/', $buffer, $match, 0, $offset - 1)) {
+            $content .= chr(octdec($match[1]));
+            $offset += strlen($match[1]) - 1;
+            return;
+        }
+
+        $content .= '\\' . $escaped;
+    }
+
+    protected function readHexChar(int $maxLen, string $buffer, int &$offset)
+    {
+        if (preg_match('/\G([0-9A-F]{1,' . $maxLen . '})/', $buffer, $match, 0, $offset)) {
+            $offset += strlen($match[1]);
+            if (strlen($match[1]) <= 2) {
+                return chr(hexdec($match[1]));
+            }
+
+            $char = html_entity_decode('&#x' . $match[1] . ';');
+            return substr($char, 0, 3) === '&#x' ? '' : $char;
+        }
+
+        return false;
     }
 }
