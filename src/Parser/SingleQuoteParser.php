@@ -33,6 +33,6 @@ class SingleQuoteParser extends AbstractQuoteParser
 
     public function match(string $buffer, int $offset): bool
     {
-        return $buffer[$offset] === "'";
+        return $buffer[$offset] === static::QUOTE;
     }
 }

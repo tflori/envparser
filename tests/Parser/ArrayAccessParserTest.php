@@ -5,6 +5,7 @@ namespace EnvParserTests\Parser;
 use EnvParser\Parser\ArrayAccessParser;
 use EnvParserTests\TestCase;
 
+/** @covers \EnvParser\Parser\ArrayAccessParser */
 class ArrayAccessParserTest extends TestCase
 {
     /** @test */

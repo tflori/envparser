@@ -6,7 +6,8 @@ use EnvParser\Parser\CStringParser;
 use EnvParser\ParserError;
 use EnvParserTests\TestCase;
 
-class CstringParserTest extends TestCase
+/** @covers \EnvParser\Parser\CStringParser */
+class CStringParserTest extends TestCase
 {
     /** @test */
     public function matchesDollarFollowedBySingleQuote()

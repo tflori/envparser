@@ -5,6 +5,7 @@ namespace EnvParserTests\Parser;
 use EnvParser\Parser\CommentParser;
 use EnvParserTests\TestCase;
 
+/** @covers \EnvParser\Parser\CommentParser */
 class CommentParserTest extends TestCase
 {
     /** @test */

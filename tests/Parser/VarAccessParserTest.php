@@ -8,6 +8,7 @@ use EnvParser\Parser\VarAccessParser;
 use EnvParser\ParserError;
 use EnvParserTests\TestCase;
 
+/** @covers \EnvParser\Parser\VarAccessParser */
 class VarAccessParserTest extends TestCase
 {
     /** @test */
@@ -52,6 +53,32 @@ class VarAccessParserTest extends TestCase
         self::expectException(ParserError::class);
 
         $parser->read($buffer, $offset);
+    }
+
+    /** @test */
+    public function storesTheValueFromVar()
+    {
+        $parser = new VarAccessParser($this->envFile);
+        $buffer = 'var=$foo';
+        $offset = 4;
+
+        $this->envFile->shouldReceive('get')->with('foo')->once()->andReturn('bar');
+
+        $parser->read($buffer, $offset);
+
+        self::assertSame('bar', $parser->getValue());
+    }
+
+    /** @test */
+    public function endsWithAnythingElse()
+    {
+        $parser = new VarAccessParser($this->envFile);
+        $buffer = 'var=$foo[]';
+        $offset = 4;
+
+        $parser->read($buffer, $offset);
+
+        self::assertSame(8, $offset);
     }
 
     /** @test */

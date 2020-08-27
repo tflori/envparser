@@ -6,6 +6,7 @@ use EnvParser\Parser\ValueParser;
 use EnvParser\ParserError;
 use EnvParserTests\TestCase;
 
+/** @covers \EnvParser\Parser\ValueParser */
 class ValueParserTest extends TestCase
 {
     /** @test */

@@ -8,6 +8,7 @@ use EnvParser\ParserError;
 use EnvParserTests\TestCase;
 use Mockery as m;
 
+/** @covers \EnvParser\Parser\DoubleQuoteParser */
 class DoubleQuoteParserTest extends TestCase
 {
     /** @test */

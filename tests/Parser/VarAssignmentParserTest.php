@@ -7,6 +7,7 @@ use EnvParser\Parser\VarAssignmentParser;
 use EnvParserTests\TestCase;
 use Mockery as m;
 
+/** @covers \EnvParser\Parser\VarAssignmentParser */
 class VarAssignmentParserTest extends TestCase
 {
     /** @dataProvider provideValidVarNames

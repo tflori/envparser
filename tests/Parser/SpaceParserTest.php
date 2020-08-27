@@ -5,6 +5,7 @@ namespace EnvParserTests\Parser;
 use EnvParser\Parser\SpaceParser;
 use EnvParserTests\TestCase;
 
+/** @covers \EnvParser\Parser\SpaceParser */
 class SpaceParserTest extends TestCase
 {
     /** @test */

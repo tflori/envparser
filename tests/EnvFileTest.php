@@ -30,14 +30,35 @@ class EnvFileTest extends TestCase
         self::assertSame('bar', $foo);
     }
 
-    /** @test */
-    public function interpretsScalarValuesFromContext()
+    /** @test
+     * @param string $value
+     * @param mixed $expected
+     * @dataProvider provideScalarValues */
+    public function interpretsScalarValuesFromContext($value, $expected)
     {
-        $envFile = new EnvFile(['foo' => '42']);
+        $envFile = new EnvFile(['foo' => $value]);
 
         $foo = $envFile['foo'];
 
-        self::assertSame(42, $foo);
+        self::assertSame($expected, $foo);
+    }
+
+    public function provideScalarValues()
+    {
+        return [
+            ['42', 42],
+            ['23.7', 23.7],
+            ['0.5E4', 5000],
+            ['-17', -17],
+            ['3E-1', 0.3],
+            ['null', null],
+            ['', null],
+            ['NULL', null],
+            ['true', true],
+            ['false', false],
+            ['TRUE', true],
+            ['FALSE', false],
+        ];
     }
 
     /** @test */
