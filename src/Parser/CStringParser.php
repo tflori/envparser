@@ -7,6 +7,26 @@ use EnvParser\ParserError;
 
 class CStringParser extends AbstractParser
 {
+    protected const ESCAPE_MAPPING = [
+        '"' => '"',
+        '\'' => '\'',
+        '\\' => '\\',
+        'a' => "\x7",
+        'b' => "\x8",
+        'e' => "\e",
+        'E' => "\e",
+        'f' => "\xC",
+        'n' => "\n",
+        'r' => "\r",
+        't' => "\t",
+        'v' => "\v",
+    ];
+
+    protected const MAX_UNICODE_LENGTH = [
+        'x' => 2,
+        'u' => 4,
+        'U' => 8,
+    ];
 
     /** @var string */
     protected $string;
@@ -60,32 +80,13 @@ class CStringParser extends AbstractParser
 
     protected function readEscapedCharacter(string $escaped, string $buffer, int &$offset, string &$content)
     {
-        static $mapping = [
-            '"' => '"',
-            '\'' => '\'',
-            '\\' => '\\',
-            'a' => "\x7",
-            'b' => "\x8",
-            'e' => "\e",
-            'E' => "\e",
-            'f' => "\xC",
-            'n' => "\n",
-            'r' => "\r",
-            't' => "\t",
-            'v' => "\v",
-        ];
-        if (isset($mapping[$escaped])) {
-            $content .= $mapping[$escaped];
+        if (isset(self::ESCAPE_MAPPING[$escaped])) {
+            $content .= self::ESCAPE_MAPPING[$escaped];
             return;
         }
 
-        static $maxLen = [
-            'x' => 2,
-            'u' => 4,
-            'U' => 8,
-        ];
-        if (isset($maxLen[$escaped])) {
-            $char = $this->readHexChar($maxLen[$escaped], $buffer, $offset);
+        if (isset(self::MAX_UNICODE_LENGTH[$escaped])) {
+            $char = $this->readHexChar(self::MAX_UNICODE_LENGTH[$escaped], $buffer, $offset);
             $content .= $char === false ? '\\' . $escaped : $char;
             return;
         }
