@@ -30,11 +30,7 @@ class CStringParser extends AbstractParser
                     if ($char === '\\') {
                         $state = 'escaped';
                     } elseif ($char === '\'') {
-                        // To be honest: I'm not sure that this is not a security risk
-                        // otherwise we had to implement all the different escape sequences:
-                        // https://wiki.bash-hackers.org/syntax/quoting#ansi_c_like_strings
-                        exec('echo $\'' . $content . '\'', $output);
-                        $this->string = implode(PHP_EOL, $output);
+                        $this->string = $content;
                         return;
                     } else {
                         $content .= $char;
@@ -42,7 +38,95 @@ class CStringParser extends AbstractParser
                     break;
 
                 case 'escaped':
-                    $content .= '\\' . $char;
+                    switch ($char) {
+                        case '"':
+                            $content .= '"';
+                            break;
+
+                        case '\'':
+                            $content .= '\'';
+                            break;
+
+                        case '\\':
+                            $content .= '\\';
+                            break;
+
+                        case 'a':
+                            $content .= "\x7";
+                            break;
+
+                        case 'b':
+                            $content .= "\x8";
+                            break;
+
+                        case 'e':
+                        case 'E':
+                            $content .= "\e";
+                            break;
+
+                        case 'f':
+                            $content .= "\xC";
+                            break;
+
+                        case 'n':
+                            $content .= "\n";
+                            break;
+
+                        case 'r':
+                            $content .= "\r";
+                            break;
+
+                        case 't':
+                            $content .= "\t";
+                            break;
+
+                        case 'v':
+                            $content .= "\v";
+                            break;
+
+                        case 'x': // hexadecimal
+                            if (!preg_match('/\G([0-9A-F]{1,2})/', $buffer, $match, 0, $offset)) {
+                                $content .= '\\x';
+                            } else {
+                                $content .= chr(hexdec($match[1]));
+                                $offset += strlen($match[1]);
+                            }
+                            break;
+
+                        case 'u': // unicode
+                            if (!preg_match('/\G([0-9A-F]{1,4})/', $buffer, $match, 0, $offset)) {
+                                $content .= '\\u';
+                            } else {
+                                $content .= html_entity_decode('&#x' . $match[1] . ';');
+                                $offset += strlen($match[1]);
+                            }
+                            break;
+
+                        case 'U': // unicode with up to 8 digits
+                            if (!preg_match('/\G([0-9A-F]{1,8})/', $buffer, $match, 0, $offset)) {
+                                $content .= '\\U';
+                            } else {
+                                $content .= html_entity_decode('&#x' . $match[1] . ';');
+                                $offset += strlen($match[1]);
+                            }
+                            break;
+
+                        case 'c':
+                            $dec = ord(strtoupper($buffer[$offset])) - 64;
+                            if ($dec >= 0 && $dec < 32) {
+                                $content .= chr($dec);
+                            }
+                            $offset++;
+                            break;
+
+                        default:
+                            if (preg_match('/\G([0-7]{1,3})/', $buffer, $match, 0, $offset - 1)) {
+                                $content .= chr(octdec($match[1]));
+                                $offset += strlen($match[1]) - 1;
+                            } else {
+                                $content .= '\\' . $char;
+                            }
+                    }
                     $state = 'unescaped';
                     break;
             }
