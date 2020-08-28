@@ -76,36 +76,38 @@ class EnvFile extends \ArrayObject
             $size = strlen($buffer);
             $offset = 0;
             while ($offset < $size) {
-                $parser = null;
-                foreach ($parsers as $parser) {
-                    if ($parser->match($buffer, $offset)) {
-                        $parser->read($buffer, $offset);
-
-                        if ($parser instanceof CommentParser or $parser instanceof SpaceParser) {
-                            continue 2;
-                        }
-
-                        if ($parser instanceof VarAssignmentParser) {
-                            $var = $parser->getVar();
-                            $key = $parser->getKey();
-                            if ($key) {
-                                $current = (array)($this[$var] ?? []);
-                                $current[$key] = $parser->getValue();
-                                $this[$var] = $current;
-                            } else {
-                                $this[$var] = $parser->getValue();
-                            }
-                            continue 2;
-                        }
-                    }
+                $parser = $this->matchParser($parsers, $buffer, $offset);
+                if (!$parser) {
+                    preg_match('/\G(.*?)([' . self::WHITESPACE_CHARACTERS . ']|$)/', $buffer, $match, 0, $offset);
+                    throw new ParserError(sprintf('Unexpected %s', $match[1]));
                 }
 
-                preg_match('/\G(.*?)([' . self::WHITESPACE_CHARACTERS . ']|$)/', $buffer, $match, 0, $offset);
-                throw new ParserError(sprintf('Unexpected %s', $match[1]));
+                $parser->read($buffer, $offset);
+                if ($parser instanceof VarAssignmentParser) {
+                    $var = $parser->getVar();
+                    $key = $parser->getKey();
+                    if ($key) {
+                        $current = (array)($this[$var] ?? []);
+                        $current[$key] = $parser->getValue();
+                        $this[$var] = $current;
+                    } else {
+                        $this[$var] = $parser->getValue();
+                    }
+                }
             }
         } catch (ParserError $parserError) {
             throw new ParseError($parserError, $path, $buffer, $offset);
         }
+    }
+
+    public function matchParser(array $parsers, string $buffer, int $offset): ?AbstractParser
+    {
+        foreach ($parsers as $parser) {
+            if ($parser->match($buffer, $offset)) {
+                return $parser;
+            }
+        }
+        return null;
     }
 
     public function getParser($class): AbstractParser
