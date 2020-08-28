@@ -72,6 +72,44 @@ class EnvFileTest extends TestCase
     }
 
     /** @test */
+    public function arrayCopiesContainTheContext()
+    {
+        $path = $this->createEnvFile("LOG_LEVEL=5\n");
+        $envFile = new EnvFile(['FOO' => 'bar']);
+        $envFile->read($path);
+
+        $result = $envFile->getArrayCopy();
+
+        self::assertSame([
+            'LOG_LEVEL' => 5,
+            'FOO' => 'bar'
+        ], $result);
+    }
+
+    /** @test */
+    public function scalarValuesFromContextAreConvertedInArrayCopies()
+    {
+        $envFile = new EnvFile(['LOG_LEVEL' => '5']);
+
+        $result = $envFile->getArrayCopy();
+
+        self::assertSame(['LOG_LEVEL' => 5], $result);
+    }
+
+    /** @test */
+    public function environmentVariablesHavePrecedence()
+    {
+        $path = $this->createEnvFile("LOG_LEVEL=5\n");
+        $envFile = new EnvFile(['LOG_LEVEL' => '2']);
+        $envFile->read($path);
+
+        self::assertSame(2, $envFile->get('LOG_LEVEL'));
+
+        $arrayCopy = $envFile->getArrayCopy();
+        self::assertSame(2, $arrayCopy['LOG_LEVEL']);
+    }
+
+    /** @test */
     public function ignoresCommentedVarAssignments()
     {
         $path = $this->createEnvFile("#foo=bar\n");

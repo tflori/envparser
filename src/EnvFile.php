@@ -45,6 +45,11 @@ class EnvFile extends \ArrayObject
         return parent::offsetGet($var);
     }
 
+    public function getArrayCopy()
+    {
+        return array_merge(parent::getArrayCopy(), array_map([$this, 'string2Var'], $this->context));
+    }
+
     public function offsetGet($index)
     {
         return $this->get($index);
