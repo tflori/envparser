@@ -32,6 +32,12 @@ class EnvFile extends \ArrayObject
         parent::__construct([], self::ARRAY_AS_PROPS);
     }
 
+    /** @codeCoverageIgnore trivial */
+    public function setContext(array $context = null)
+    {
+        $this->context = $context ?? getenv();
+    }
+
     public function get($var, $default = null)
     {
         if (!isset($this->context[$var]) && !isset($this[$var])) {
@@ -133,5 +139,35 @@ class EnvFile extends \ArrayObject
         }
 
         return $value;
+    }
+
+    /** @codeCoverageIgnore only executed in php <7.4 */
+    public function serialize()
+    {
+        return serialize(parent::getArrayCopy());
+    }
+
+    /** @codeCoverageIgnore only executed in php >=7.4 */
+    public function __serialize(): array
+    {
+        return parent::getArrayCopy();
+    }
+
+    /** @codeCoverageIgnore only executed in php <7.4 */
+    public function unserialize($serialized)
+    {
+        $this->__unserialize(unserialize($serialized));
+    }
+
+    /**
+     * @param array $data
+     * @noinspection PhpHierarchyChecksInspection
+     */
+    public function __unserialize($data)
+    {
+        foreach ($data as $key => $value) {
+            $this[$key] = $value;
+        }
+        $this->context = getenv();
     }
 }

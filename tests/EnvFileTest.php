@@ -143,6 +143,19 @@ class EnvFileTest extends TestCase
     }
 
     /** @test */
+    public function resetsContextAfterSerialization()
+    {
+        $path = $this->createEnvFile("foo=baz\n");
+        $old = new EnvFile(['foo' => 'bar']);
+        $old->read($path);
+        $cached = serialize($old);
+
+        $envFile = unserialize($cached);
+
+        self::assertNotEquals('bar', $envFile->get('foo'));
+    }
+
+    /** @test */
     public function throwsForUnexpectedContent()
     {
         $path = $this->createEnvFile("foo=bar command\n");
