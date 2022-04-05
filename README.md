@@ -1,6 +1,6 @@
 # tflori/envparser
 
-[![Build Status](https://travis-ci.org/tflori/envparser.svg?branch=master)](https://travis-ci.org/tflori/envparser)
+[![.github/workflows/push.yml](https://github.com/tflori/envparser/actions/workflows/push.yml/badge.svg)](https://github.com/tflori/envparser/actions/workflows/push.yml)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/7f1a0e438b1f9981aa59/test_coverage)](https://codeclimate.com/github/tflori/envparser/test_coverage)
 [![Maintainability](https://api.codeclimate.com/v1/badges/9434ba649634cb577b87/maintainability)](https://codeclimate.com/github/tflori/envparser/maintainability)
 [![Latest Stable Version](https://poser.pugx.org/tflori/envparser/v/stable.svg)](https://packagist.org/packages/tflori/envparser) 
