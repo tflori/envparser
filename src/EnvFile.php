@@ -20,7 +20,7 @@ class EnvFile extends \ArrayObject
     /** @var AbstractParser[] */
     protected $resolved = [];
 
-    public function __construct(array $context = null, callable $resolver = null)
+    public function __construct(?array $context = null, ?callable $resolver = null)
     {
         $this->context = $context ?? getenv();
         $this->resolver = $resolver ?? function (string $class, ...$args) {
@@ -33,7 +33,7 @@ class EnvFile extends \ArrayObject
     }
 
     /** @codeCoverageIgnore trivial */
-    public function setContext(array $context = null)
+    public function setContext(?array $context = null)
     {
         $this->context = $context ?? getenv();
     }
@@ -51,7 +51,7 @@ class EnvFile extends \ArrayObject
         return parent::offsetGet($var);
     }
 
-    public function getArrayCopy()
+    public function getArrayCopy(): array
     {
         return array_merge(parent::getArrayCopy(), array_map([$this, 'string2Var'], $this->context));
     }
@@ -134,36 +134,23 @@ class EnvFile extends \ArrayObject
 
         if (is_numeric($value)) {
             $int = (int)$value;
-            $float = (double)$value;
+            $float = (float)$value;
             return $int == $float ? $int : $float;
         }
 
         return $value;
     }
-
-    /** @codeCoverageIgnore only executed in php <7.4 */
-    public function serialize()
-    {
-        return serialize(parent::getArrayCopy());
-    }
-
+    
     /** @codeCoverageIgnore only executed in php >=7.4 */
     public function __serialize(): array
     {
         return parent::getArrayCopy();
     }
-
-    /** @codeCoverageIgnore only executed in php <7.4 */
-    public function unserialize($serialized)
-    {
-        $this->__unserialize(unserialize($serialized));
-    }
-
+    
     /**
      * @param array $data
-     * @noinspection PhpHierarchyChecksInspection
      */
-    public function __unserialize($data)
+    public function __unserialize($data):  void
     {
         foreach ($data as $key => $value) {
             $this[$key] = $value;
