@@ -31,7 +31,7 @@ abstract class AbstractParser
     /**
      * @param string $buffer
      * @param int    $offset
-     * @return mixed
+     * @return bool
      */
     abstract public function match(string $buffer, int $offset): bool;
 }

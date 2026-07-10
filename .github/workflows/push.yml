@@ -35,6 +35,10 @@ jobs:
             --coverage-clover=coverage/clover-${{ matrix.php-version }}.xml \
             --coverage-text \
             --color=always
+          
+      - name: Execute static analysis
+        run: |
+          vendor/bin/phpstan analyse --no-progress --ansi --level=5 src
 
       - name: Store Coverage Result
         uses: actions/upload-artifact@v4

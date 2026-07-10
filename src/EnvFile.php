@@ -56,6 +56,7 @@ class EnvFile extends \ArrayObject
         return array_merge(parent::getArrayCopy(), array_map([$this, 'string2Var'], $this->context));
     }
 
+    #[\ReturnTypeWillChange]
     public function offsetGet($index)
     {
         return $this->get($index);
@@ -102,7 +103,7 @@ class EnvFile extends \ArrayObject
                 }
             }
         } catch (ParserError $parserError) {
-            throw new ParseError($parserError, $path, $buffer, $offset);
+            throw new ParseError($parserError, $path, $buffer, $offset ?? 0);
         }
     }
 
